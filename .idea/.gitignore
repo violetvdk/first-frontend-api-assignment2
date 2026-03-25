@@ -1,6 +1,8 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/node_modules/
+/.idea/
 # Ignored default folder with query files
 /queries/
 # Datasource local storage ignored files
