@@ -1,5 +1,5 @@
 import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import Gebruikers from "./data/gebruikers.jsx";
+import Gebruikers from "./components/pages/Gebruikers.jsx";
 
 function App() {
   return (<BrowserRouter>
@@ -8,7 +8,7 @@ function App() {
           <Route path="/*" element={<Navigate to={'/home'} />}/>
         </Routes>
       </BrowserRouter>
-  )
+  );
 }
 
 export default App
