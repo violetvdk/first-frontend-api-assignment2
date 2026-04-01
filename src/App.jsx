@@ -1,15 +1,13 @@
-import './App.css'
-import {useEffect, useState} from "react";
-import getUserComponents from "./data/gebruikers.jsx";
+import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
+import Gebruikers from "./data/gebruikers.jsx";
 
 function App() {
-  const [users, setUsers] = useState(<> </>);
-  useEffect(() => {
-    getUserComponents().then(users => setUsers(users));
-  }, [setUsers]);
-
-  return (
-      users
+  return (<BrowserRouter>
+        <Routes>
+          <Route path="/home" element={<Gebruikers/>}></Route>
+          <Route path="/*" element={<Navigate to={'/home'} />}/>
+        </Routes>
+      </BrowserRouter>
   )
 }
 
