@@ -3,4 +3,5 @@ function Gebruiker(props) {
         <h3>Naam: {props.gebruiker}</h3>
     </>)
 }
-export default Gebruiker
+
+export default Gebruiker;
