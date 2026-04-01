@@ -14,25 +14,13 @@ async function getUserComponents() {
     }
     return (<div>
         {
-            users.map((user) => makeUserComponent(user))
+            users.map((user) => (
+                <div key={user.url}>
+                    {user.name}
+                </div>
+            ))
         }
     </div>);
-}
-
-async function fetchJSONfromUser(link) {
-    return fetch(link).then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('API call for user details failed with status ' + response.status);
-        }
-    });
-}
-
-function makeUserComponent(user) {
-    return <div>
-        <h3>Naam: {user["name"]}</h3>
-    </div>
 }
 
 async function fetchUsers() {
@@ -45,6 +33,16 @@ async function fetchUsers() {
         }
     });
     return (await result.json())["users"];
+}
+
+async function fetchJSONfromUser(link) {
+    return fetch(link).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('API call for user details failed with status ' + response.status);
+        }
+    });
 }
 
 export default getUserComponents;
