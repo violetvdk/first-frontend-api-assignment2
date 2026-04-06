@@ -1,33 +1,33 @@
 import {useEffect, useState} from "react";
 import {useParams, Link} from "react-router-dom";
 
-function GetUserComponent() {
+function GetGenreComponent() {
     const {url} = useParams();
-    const [user, setUser] = useState([]);
+    const [genre, setGenre] = useState([]);
     useEffect(() => {
         const link = decodeURIComponent(url);
-        fetchJSONfromUser(link).then(setUser);
+        fetchJSONfromGenre(link).then(setGenre);
     }, [url]);
-    return <div>{makeUserComponent(user)}</div>;
+    return <div>{makeGenreComponent(genre)}</div>;
 }
 
-async function fetchJSONfromUser(link) {
+async function fetchJSONfromGenre(link) {
     let result = await fetch(link).then(response => {
         if (response.ok) {
             return response;
         } else {
-            throw new Error('API call for user details failed with status ' + response.status);
+            throw new Error('API call for genre details failed with status ' + response.status);
         }
     });
     return await result.json();
 }
 
-function makeUserComponent(user) {
-    return Object.entries(user).map(([key, value]) => makeItem(key, value));
+function makeGenreComponent(genre) {
+    return Object.entries(genre).map(([key, value]) => makeItem(key, value));
 }
 
 function makeItem(key, value) {
-    if (["reviews", "positions"].includes(key)) {
+    if (["audiobooks"].includes(key)) {
         return (
             <div key={key}>
                 <span>{key}: </span>
@@ -43,23 +43,23 @@ function makeItem(key, value) {
     }
     else if (key === "url") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/users/${encodeURIComponent(value)}`}>
+            <div key={key}><span>{key}: </span><Link to={`/genres/${encodeURIComponent(value)}`}>
                 {String(value)}
             </Link></div>
         )
     }
     else if (key === "index") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/users`}>
+            <div key={key}><span>{key}: </span><Link to={`/genres`}>
                 {String(value)}
             </Link></div>
         )
     }
     else return (
-        <div key={key}>
-            {String(key + ": " + value)}
-        </div>
-    )
+            <div key={key}>
+                {String(key + ": " + value)}
+            </div>
+        )
 }
 
-export default GetUserComponent;
+export default GetGenreComponent;

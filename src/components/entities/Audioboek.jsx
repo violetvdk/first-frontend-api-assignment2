@@ -8,10 +8,7 @@ function GetAudiobookComponent() {
         const link = decodeURIComponent(url);
         fetchJSONfromAudiobook(link).then(setAudiobook);
     }, [url]);
-    return (<>
-        <div key="index"><span>index: </span><Link to={`/audiobooks`}>{`/audiobooks`}</Link></div>
-        <div>{makeAudiobookComponent(audiobook)}</div>
-    </>);
+    return <div>{makeAudiobookComponent(audiobook)}</div>;
 }
 
 async function fetchJSONfromAudiobook(link) {
