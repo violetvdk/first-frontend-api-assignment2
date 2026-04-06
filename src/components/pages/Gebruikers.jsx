@@ -13,7 +13,7 @@ function GetUserComponents() {
             });
         });
     }, []);
-    return <>{users}</>;
+    return <><div key="index"><span>index: </span><Link to={`/home`}>{`/home`}</Link></div>{users}</>;  // de /home moet nog veranderd worden naar de echte home-url
 }
 
 async function fetchUsers() {
