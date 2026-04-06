@@ -1,14 +1,15 @@
 import fetchIndex from "../../index.js";
 import {useEffect, useState} from "react";
+import {Link} from "react-router-dom";
 
 function GetUserComponents() {
     const [users, setUsers] = useState([]);
     useEffect(() => {
         fetchUsers().then((links) => {
             fetchJSONSfromUsers(links).then((users) => {
-                setUsers(users.map((user) => (<div key={user.url}>
-                    {user.name}
-                </div>)));
+                setUsers(users.map((user) => (<div key={user.url}><Link to={`/users/${encodeURIComponent(user.url)}`}>
+                    {user.url}
+                </Link></div>)));
             });
         });
     }, []);
