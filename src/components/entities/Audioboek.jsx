@@ -66,6 +66,13 @@ function makeItem(key, value) {
                 ))}
             </div>)
     }
+    else if (key === "link") {
+        return (
+            <div key={key}><span>{key}: </span><Link to={`${value}`}>
+                {String(value)}
+            </Link></div>
+        )
+    }
     else return (
             <div key={key}>
                 {String(key + ": " + value)}
