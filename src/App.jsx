@@ -8,6 +8,7 @@ import Posities from "./components/pages/Posities.jsx";
 import Reviews from "./components/pages/Reviews.jsx";
 import Audioboek from "./components/entities/Audioboek.jsx";
 import Genre from "./components/entities/Genre.jsx";
+import Positie from "./components/entities/Positie.jsx";
 
 function App() {
   return (<BrowserRouter>
@@ -20,6 +21,7 @@ function App() {
             <Route path="/genres" element={<Genres/>}></Route>
             <Route path="/genres/:url" element={<Genre/>}></Route>
             <Route path="/positions" element={<Posities/>}></Route>
+            <Route path="/positions/:url" element={<Positie/>}></Route>
             <Route path="/reviews" element={<Reviews/>}></Route>
             <Route path="/*" element={<Navigate to={'/home'} />}></Route>
         </Routes>
