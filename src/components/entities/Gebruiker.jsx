@@ -8,9 +8,10 @@ function GetUserComponent() {
         const link = decodeURIComponent(url);
         fetchJSONfromUser(link).then(setUser);
     }, [url]);
-    return (<div>
-        {makeUserComponent(user)}
-    </div>);
+    return (<>
+        <div key="index"><span>index: </span><Link to={`/users`}>{`/users`}</Link></div>
+        <div>{makeUserComponent(user)}</div>
+    </>);
 }
 
 async function fetchJSONfromUser(link) {
