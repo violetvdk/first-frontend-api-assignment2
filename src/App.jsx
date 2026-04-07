@@ -27,7 +27,6 @@ function App() {
             <Route path="/users" element={<Gebruikers/>}></Route>
             <Route path="/users/:url" element={<Gebruiker/>}></Route>
             <Route path="/*" element={<Not_found/>}></Route>
-            // <Route path="/*" element={<Navigate to={'/home'} />}></Route>
         </Routes>
       </BrowserRouter>
   );
