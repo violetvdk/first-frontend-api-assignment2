@@ -10,6 +10,7 @@ import Genre from "./components/entities/Genre.jsx";
 import Positie from "./components/entities/Positie.jsx";
 import Review from "./components/entities/Review.jsx";
 import Gebruiker from "./components/entities/Gebruiker.jsx";
+import Not_found from "./components/pages/Not_found.jsx";
 
 function App() {
   return (<BrowserRouter>
@@ -25,7 +26,8 @@ function App() {
             <Route path="/reviews/:url" element={<Review/>}></Route>
             <Route path="/users" element={<Gebruikers/>}></Route>
             <Route path="/users/:url" element={<Gebruiker/>}></Route>
-            <Route path="/*" element={<Navigate to={'/home'} />}></Route>
+            <Route path="/*" element={<Not_found/>}></Route>
+            // <Route path="/*" element={<Navigate to={'/home'} />}></Route>
         </Routes>
       </BrowserRouter>
   );
