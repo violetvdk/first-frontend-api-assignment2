@@ -3,12 +3,27 @@ import {useParams, Link} from "react-router-dom";
 
 function GetUserComponent() {
     const {url} = useParams();
-    const [user, setUser] = useState([]);
+    const [user, setUser] = useState({});
+
     useEffect(() => {
         const link = decodeURIComponent(url);
         fetchJSONfromUser(link).then(setUser);
     }, [url]);
-    return <div>{makeUserComponent(user)}</div>;
+
+    return (
+        <div className="entity-table-wrapper">
+            <table className="entity-table">
+                <tbody>
+                {Object.entries(user).map(([key, value]) => (
+                    <tr key={key}>
+                        <th>{key}</th>
+                        <td>{makeCellContent(key, value)}</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
 async function fetchJSONfromUser(link) {
@@ -22,44 +37,34 @@ async function fetchJSONfromUser(link) {
     return await result.json();
 }
 
-function makeUserComponent(user) {
-    return Object.entries(user).map(([key, value]) => makeItem(key, value));
-}
-
-function makeItem(key, value) {
+function makeCellContent(key, value) {
     if (["reviews", "positions"].includes(key)) {
-        return (
-            <div key={key}>
-                <span>{key}: </span>
-                {value.map((v) => (
-                    <div key={v}>
-                        <Link to={`/${key}/${encodeURIComponent(v)}`}>
-                            {String(v)}
-                        </Link>
-                    </div>
-                ))}
+        return value.map((v) => (
+            <div key={`${key}-${v}`}>
+                <Link to={`/${key}/${encodeURIComponent(v)}`}>
+                    {String(v)}
+                </Link>
             </div>
+        ));
+    }
+
+    if (key === "url") {
+        return (
+            <Link to={`/users/${encodeURIComponent(value)}`}>
+                {String(value)}
+            </Link>
         );
     }
-    else if (key === "url") {
+
+    if (key === "index") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/users/${encodeURIComponent(value)}`}>
+            <Link to="/users">
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "index") {
-        return (
-            <div key={key}><span>{key}: </span><Link to={`/users`}>
-                {String(value)}
-            </Link></div>
-        )
-    }
-    else return (
-        <div key={key}>
-            {String(key + ": " + value)}
-        </div>
-    )
+
+    return String(value);
 }
 
 export default GetUserComponent;

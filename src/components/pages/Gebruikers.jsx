@@ -4,16 +4,22 @@ import {Link} from "react-router-dom";
 
 function Gebruikers() {
     const [users, setUsers] = useState([]);
+
     useEffect(() => {
         fetchUsers().then((links) => {
             fetchJSONSfromUsers(links).then((users) => {
-                setUsers(users.map((user) => (<div key={user.url}><Link to={`/users/${encodeURIComponent(user.url)}`}>
-                    {user.url}
-                </Link></div>)));
+                setUsers(users.map((user) => (
+                    <div className="resource-card" key={user.url}>
+                        <Link className="resource-link" to={`/users/${encodeURIComponent(user.url)}`}>
+                            {user.url}
+                        </Link>
+                    </div>
+                )));
             });
         });
     }, []);
-    return (<>{users}</>);
+
+    return <div className="resource-list">{users}</div>;
 }
 
 async function fetchUsers() {

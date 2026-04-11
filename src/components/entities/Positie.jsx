@@ -3,12 +3,27 @@ import {useParams, Link} from "react-router-dom";
 
 function GetPositionComponent() {
     const {url} = useParams();
-    const [position, setPosition] = useState([]);
+    const [position, setPosition] = useState({});
+
     useEffect(() => {
         const link = decodeURIComponent(url);
         fetchJSONfromPosition(link).then(setPosition);
     }, [url]);
-    return <div>{makePositionComponent(position)}</div>;
+
+    return (
+        <div className="entity-table-wrapper">
+            <table className="entity-table">
+                <tbody>
+                {Object.entries(position).map(([key, value]) => (
+                    <tr key={key}>
+                        <th>{key}</th>
+                        <td>{makeCellContent(key, value)}</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
 async function fetchJSONfromPosition(link) {
@@ -22,37 +37,32 @@ async function fetchJSONfromPosition(link) {
     return await result.json();
 }
 
-function makePositionComponent(position) {
-    return Object.entries(position).map(([key, value]) => makeItem(key, value));
-}
-
-function makeItem(key, value) {
+function makeCellContent(key, value) {
     if (["user", "audiobook"].includes(key)) {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/${key}s/${encodeURIComponent(value)}`}>
+            <Link to={`/${key}s/${encodeURIComponent(value)}`}>
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "url") {
+
+    if (key === "url") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/positions/${encodeURIComponent(value)}`}>
+            <Link to={`/positions/${encodeURIComponent(value)}`}>
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "index") {
+
+    if (key === "index") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/positions`}>
+            <Link to="/positions">
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else return (
-            <div key={key}>
-                {String(key + ": " + value)}
-            </div>
-        )
+
+    return String(value);
 }
 
 export default GetPositionComponent;

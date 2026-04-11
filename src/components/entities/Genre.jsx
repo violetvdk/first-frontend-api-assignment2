@@ -3,12 +3,27 @@ import {useParams, Link} from "react-router-dom";
 
 function GetGenreComponent() {
     const {url} = useParams();
-    const [genre, setGenre] = useState([]);
+    const [genre, setGenre] = useState({});
+
     useEffect(() => {
         const link = decodeURIComponent(url);
         fetchJSONfromGenre(link).then(setGenre);
     }, [url]);
-    return <div>{makeGenreComponent(genre)}</div>;
+
+    return (
+        <div className="entity-table-wrapper">
+            <table className="entity-table">
+                <tbody>
+                {Object.entries(genre).map(([key, value]) => (
+                    <tr key={key}>
+                        <th>{key}</th>
+                        <td>{makeCellContent(key, value)}</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
 async function fetchJSONfromGenre(link) {
@@ -22,44 +37,34 @@ async function fetchJSONfromGenre(link) {
     return await result.json();
 }
 
-function makeGenreComponent(genre) {
-    return Object.entries(genre).map(([key, value]) => makeItem(key, value));
-}
-
-function makeItem(key, value) {
-    if (["audiobooks"].includes(key)) {
-        return (
-            <div key={key}>
-                <span>{key}: </span>
-                {value.map((v) => (
-                    <div key={v}>
-                        <Link to={`/${key}/${encodeURIComponent(v)}`}>
-                            {String(v)}
-                        </Link>
-                    </div>
-                ))}
+function makeCellContent(key, value) {
+    if (key === "audiobooks") {
+        return value.map((v) => (
+            <div key={`${key}-${v}`}>
+                <Link to={`/${key}/${encodeURIComponent(v)}`}>
+                    {String(v)}
+                </Link>
             </div>
+        ));
+    }
+
+    if (key === "url") {
+        return (
+            <Link to={`/genres/${encodeURIComponent(value)}`}>
+                {String(value)}
+            </Link>
         );
     }
-    else if (key === "url") {
+
+    if (key === "index") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/genres/${encodeURIComponent(value)}`}>
+            <Link to="/genres">
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "index") {
-        return (
-            <div key={key}><span>{key}: </span><Link to={`/genres`}>
-                {String(value)}
-            </Link></div>
-        )
-    }
-    else return (
-            <div key={key}>
-                {String(key + ": " + value)}
-            </div>
-        )
+
+    return String(value);
 }
 
 export default GetGenreComponent;

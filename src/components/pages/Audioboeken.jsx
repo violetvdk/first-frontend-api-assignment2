@@ -9,8 +9,8 @@ function GetAudiobookComponents() {
         fetchAudiobooks().then((links) => {
             fetchJSONSfromAudiobooks(links).then((audiobooks) => {
                 setAudiobooks(audiobooks.map((audiobook) => (
-                    <div key={audiobook.url}>
-                        <Link className="link" to={`/audiobooks/${encodeURIComponent(audiobook.url)}`}>
+                    <div className="resource-card" key={audiobook.url}>
+                        <Link className="resource-link" to={`/audiobooks/${encodeURIComponent(audiobook.url)}`}>
                             {audiobook.url}
                         </Link>
                     </div>
@@ -18,7 +18,7 @@ function GetAudiobookComponents() {
             });
         });
     }, []);
-    return (<>{audiobooks}</>);
+    return <div className="resource-list">{audiobooks}</div>;
 }
 
 async function fetchAudiobooks() {

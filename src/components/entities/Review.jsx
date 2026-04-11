@@ -3,12 +3,27 @@ import {useParams, Link} from "react-router-dom";
 
 function GetReviewComponent() {
     const {url} = useParams();
-    const [review, setReview] = useState([]);
+    const [review, setReview] = useState({});
+
     useEffect(() => {
         const link = decodeURIComponent(url);
         fetchJSONfromReview(link).then(setReview);
     }, [url]);
-    return <div>{makeReviewComponent(review)}</div>;
+
+    return (
+        <div className="entity-table-wrapper">
+            <table className="entity-table">
+                <tbody>
+                {Object.entries(review).map(([key, value]) => (
+                    <tr key={key}>
+                        <th>{key}</th>
+                        <td>{makeCellContent(key, value)}</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
 async function fetchJSONfromReview(link) {
@@ -22,37 +37,32 @@ async function fetchJSONfromReview(link) {
     return await result.json();
 }
 
-function makeReviewComponent(review) {
-    return Object.entries(review).map(([key, value]) => makeItem(key, value));
-}
-
-function makeItem(key, value) {
+function makeCellContent(key, value) {
     if (["user", "audiobook"].includes(key)) {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/${key}s/${encodeURIComponent(value)}`}>
+            <Link to={`/${key}s/${encodeURIComponent(value)}`}>
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "url") {
+
+    if (key === "url") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/reviews/${encodeURIComponent(value)}`}>
+            <Link to={`/reviews/${encodeURIComponent(value)}`}>
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "index") {
+
+    if (key === "index") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/reviews`}>
+            <Link to="/reviews">
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else return (
-            <div key={key}>
-                {String(key + ": " + value)}
-            </div>
-        )
+
+    return String(value);
 }
 
 export default GetReviewComponent;

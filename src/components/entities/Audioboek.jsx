@@ -3,12 +3,27 @@ import {useParams, Link} from "react-router-dom";
 
 function GetAudiobookComponent() {
     const {url} = useParams();
-    const [audiobook, setAudiobook] = useState([]);
+    const [audiobook, setAudiobook] = useState({});
+
     useEffect(() => {
         const link = decodeURIComponent(url);
         fetchJSONfromAudiobook(link).then(setAudiobook);
     }, [url]);
-    return <div>{makeAudiobookComponent(audiobook)}</div>;
+
+    return (
+        <div className="entity-table-wrapper">
+            <table className="entity-table">
+                <tbody>
+                {Object.entries(audiobook).map(([key, value]) => (
+                    <tr key={key}>
+                        <th>{key}</th>
+                        <td>{makeCellContent(key, value)}</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
+    );
 }
 
 async function fetchJSONfromAudiobook(link) {
@@ -22,62 +37,46 @@ async function fetchJSONfromAudiobook(link) {
     return await result.json();
 }
 
-function makeAudiobookComponent(audiobook) {
-    return Object.entries(audiobook).map(([key, value]) => makeItem(key, value));
-}
-
-function makeItem(key, value) {
+function makeCellContent(key, value) {
     if (["genres", "reviews", "positions"].includes(key)) {
-        return (
-            <div key={key}>
-                <span>{key}: </span>
-                {value.map((v) => (
-                    <div key={v}>
-                        <Link to={`/${key}/${encodeURIComponent(v)}`}>
-                            {String(v)}
-                        </Link>
-                    </div>
-                ))}
+        return value.map((v) => (
+            <div key={`${key}-${v}`}>
+                <Link to={`/${key}/${encodeURIComponent(v)}`}>
+                    {String(v)}
+                </Link>
             </div>
+        ));
+    }
+
+    if (key === "url") {
+        return (
+            <Link to={`/audiobooks/${encodeURIComponent(value)}`}>
+                {String(value)}
+            </Link>
         );
     }
-    else if (key === "url") {
+
+    if (key === "index") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/audiobooks/${encodeURIComponent(value)}`}>
+            <Link to="/audiobooks">
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "index") {
+
+    if (key === "authors") {
+        return value.map((v) => <div key={`${key}-${v}`}>{String(v)}</div>);
+    }
+
+    if (key === "link") {
         return (
-            <div key={key}><span>{key}: </span><Link to={`/audiobooks`}>
+            <Link to={`${value}`}>
                 {String(value)}
-            </Link></div>
-        )
+            </Link>
+        );
     }
-    else if (key === "authors") {
-        return (
-            <div key={key}>
-                <span>{key}: </span>
-                {value.map((v) => (
-                    <div key={v}>
-                        {String(v)}
-                    </div>
-                ))}
-            </div>)
-    }
-    else if (key === "link") {
-        return (
-            <div key={key}><span>{key}: </span><Link to={`${value}`}>
-                {String(value)}
-            </Link></div>
-        )
-    }
-    else return (
-            <div key={key}>
-                {String(key + ": " + value)}
-            </div>
-        )
+
+    return String(value);
 }
 
 export default GetAudiobookComponent;

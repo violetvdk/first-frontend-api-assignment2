@@ -4,16 +4,22 @@ import {Link} from "react-router-dom";
 
 function GetPositionComponents() {
     const [positions, setPositions] = useState([]);
+
     useEffect(() => {
         fetchPositions().then((links) => {
             fetchJSONSfromPositions(links).then((positions) => {
-                setPositions(positions.map((position) => (<div key={position.url}><Link to={`/positions/${encodeURIComponent(position.url)}`}>
-                    {position.url}
-                </Link></div>)));
+                setPositions(positions.map((position) => (
+                    <div className="resource-card" key={position.url}>
+                        <Link className="resource-link" to={`/positions/${encodeURIComponent(position.url)}`}>
+                            {position.url}
+                        </Link>
+                    </div>
+                )));
             });
         });
     }, []);
-    return (<>{positions}</>);
+
+    return <div className="resource-list">{positions}</div>;
 }
 
 async function fetchPositions() {

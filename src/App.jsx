@@ -31,10 +31,10 @@ function App() {
                   <button className="hamburger" onClick={toggleMenu}>
                     ☰
                   </button>
-                  <span className="brand-text">Audiobooks API</span>
+                  <Link className="brand-text" to="/home">Audiobooks API</Link>
                 </div>
                 <div className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
-                  <Link to="/home" onClick={closeMenu}>Home</Link>
+                  <Link className="desktop-home-link" to="/home" onClick={closeMenu}>Home</Link>
                   <Link to="/audiobooks" onClick={closeMenu}>Audioboeken</Link>
                   <Link to="/genres" onClick={closeMenu}>Genres</Link>
                   <Link to="/positions" onClick={closeMenu}>Posities</Link>

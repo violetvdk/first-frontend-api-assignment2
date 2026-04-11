@@ -4,16 +4,23 @@ import {Link} from "react-router-dom";
 
 function GetReviewComponents() {
     const [reviews, setReviews] = useState([]);
+
     useEffect(() => {
         fetchReviews().then((links) => {
             fetchJSONSfromReviews(links).then((reviews) => {
-                setReviews(reviews.map((review) => (<div key={review.url}><Link to={`/reviews/${encodeURIComponent(review.url)}`}>
-                    {review.url}
-                </Link></div>)));
+                setReviews(reviews.map((review) => (
+                    <div className="resource-card" key={review.url}>
+                        <Link className="resource-link" to={`/reviews/${encodeURIComponent(review.url)}`}>
+                            {review.url}
+                        </Link>
+                    </div>
+                )));
             });
         });
     }, []);
-    return (<>{reviews}</>);}
+
+    return <div className="resource-list">{reviews}</div>;
+}
 
 async function fetchReviews() {
     let index = await fetchIndex();

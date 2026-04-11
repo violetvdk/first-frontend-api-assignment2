@@ -4,16 +4,22 @@ import {Link} from "react-router-dom";
 
 function GetGenreComponents() {
     const [genres, setGenres] = useState([]);
+
     useEffect(() => {
         fetchGenres().then((links) => {
             fetchJSONSfromGenres(links).then((genres) => {
-                setGenres(genres.map((genre) => (<div key={genre.url}><Link to={`/genres/${encodeURIComponent(genre.url)}`}>
-                    {genre.url}
-                </Link></div>)));
+                setGenres(genres.map((genre) => (
+                    <div className="resource-card" key={genre.url}>
+                        <Link className="resource-link" to={`/genres/${encodeURIComponent(genre.url)}`}>
+                            {genre.url}
+                        </Link>
+                    </div>
+                )));
             });
         });
     }, []);
-    return (<>{genres}</>);
+
+    return <div className="resource-list">{genres}</div>;
 }
 
 async function fetchGenres() {
