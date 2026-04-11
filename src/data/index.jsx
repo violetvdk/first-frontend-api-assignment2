@@ -1,5 +1,5 @@
 async function fetchIndex() {
-    let result = await fetch('https://groep40.webdev.stud.atlantis.ugent.be/').then(response => {
+    let result = await fetch('/api/').then(response => {
         if (response.ok) {
             return response;
         } else {
