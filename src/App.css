@@ -159,7 +159,7 @@
   word-break: break-word;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 954px) {
   #navigation-bar {
     justify-content: flex-start;
     padding: 12px;
