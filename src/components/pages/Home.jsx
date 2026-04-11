@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
-import fetchIndex from "../../index.js";
+import fetchIndex from "../../data/index.jsx";
 
 function GetHome() {
     const [home, setHome] = useState([]);

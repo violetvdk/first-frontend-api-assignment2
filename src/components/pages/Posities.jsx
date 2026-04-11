@@ -1,4 +1,4 @@
-import fetchIndex from "../../index.js";
+import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 
@@ -14,7 +14,6 @@ function GetPositionComponents() {
         });
     }, []);
     return (<>
-        <div key="index"><span>index: </span><Link to={`/home`}>{`/home`}</Link></div>
         <div>{String("positions: ")}</div>
         {positions}</>);  // de /home moet nog veranderd worden naar de echte home-url
 }

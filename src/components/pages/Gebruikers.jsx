@@ -1,8 +1,8 @@
-import fetchIndex from "../../index.js";
+import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 
-function GetUserComponents() {
+function Gebruikers() {
     const [users, setUsers] = useState([]);
     useEffect(() => {
         fetchUsers().then((links) => {
@@ -14,9 +14,8 @@ function GetUserComponents() {
         });
     }, []);
     return (<>
-        <div key="index"><span>index: </span><Link to={`/home`}>{`/home`}</Link></div>
         <div>{String("users: ")}</div>
-        {users}</>);  // de /home moet nog veranderd worden naar de echte home-url
+        {users}</>);
 }
 
 async function fetchUsers() {
@@ -50,4 +49,4 @@ async function fetchJSONfromUser(link) {
     return await result.json();
 }
 
-export default GetUserComponents;
+export default Gebruikers;

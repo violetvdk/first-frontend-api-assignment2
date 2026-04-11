@@ -14,6 +14,14 @@ import Not_found from "./components/pages/Not_found.jsx";
 
 function App() {
   return (<BrowserRouter>
+          <nav>
+                <a href="/home">Home</a>
+                <a href="/audiobooks">Audioboeken</a>
+                <a href="/genres">Genres</a>
+                <a href="/positions">Posities</a>
+                <a href="/reviews">Reviews</a>
+                <a href="/users">Gebruikers</a>
+          </nav>
         <Routes>
             <Route path="/home" element={<Home/>}></Route>
             <Route path="/audiobooks" element={<Audioboeken/>}></Route>
