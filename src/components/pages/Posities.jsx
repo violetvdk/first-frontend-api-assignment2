@@ -13,9 +13,7 @@ function GetPositionComponents() {
             });
         });
     }, []);
-    return (<>
-        <div>{String("positions: ")}</div>
-        {positions}</>);  // de /home moet nog veranderd worden naar de echte home-url
+    return (<>{positions}</>);
 }
 
 async function fetchPositions() {

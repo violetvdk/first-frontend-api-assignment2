@@ -13,10 +13,7 @@ function GetReviewComponents() {
             });
         });
     }, []);
-    return (<>
-        <div>{String("reviews: ")}</div>
-        {reviews}</>);  // de /home moet nog veranderd worden naar de echte home-url
-}
+    return (<>{reviews}</>);}
 
 async function fetchReviews() {
     let index = await fetchIndex();

@@ -13,9 +13,7 @@ function GetGenreComponents() {
             });
         });
     }, []);
-    return (<>
-        <div>{String("genres: ")}</div>
-        {genres}</>);  // de /home moet nog veranderd worden naar de echte home-url
+    return (<>{genres}</>);
 }
 
 async function fetchGenres() {

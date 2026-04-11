@@ -1,4 +1,4 @@
-import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
 import Home from "./components/pages/Home.jsx";
 import Audioboeken from "./components/pages/Audioboeken.jsx";
 import Genres from "./components/pages/Genres.jsx";
@@ -11,16 +11,17 @@ import Positie from "./components/entities/Positie.jsx";
 import Review from "./components/entities/Review.jsx";
 import Gebruiker from "./components/entities/Gebruiker.jsx";
 import Not_found from "./components/pages/Not_found.jsx";
+import "./App.css";
 
 function App() {
   return (<BrowserRouter>
-          <nav>
-                <a href="/home">Home</a>
-                <a href="/audiobooks">Audioboeken</a>
-                <a href="/genres">Genres</a>
-                <a href="/positions">Posities</a>
-                <a href="/reviews">Reviews</a>
-                <a href="/users">Gebruikers</a>
+          <nav id="navigation-bar">
+                <Link to="/home">Home</Link>
+                <Link to="/audiobooks">Audioboeken</Link>
+                <Link to="/genres">Genres</Link>
+                <Link to="/positions">Posities</Link>
+                <Link to="/reviews">Reviews</Link>
+                <Link to="/users">Gebruikers</Link>
           </nav>
         <Routes>
             <Route path="/home" element={<Home/>}></Route>

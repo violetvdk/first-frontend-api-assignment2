@@ -13,9 +13,7 @@ function Gebruikers() {
             });
         });
     }, []);
-    return (<>
-        <div>{String("users: ")}</div>
-        {users}</>);
+    return (<>{users}</>);
 }
 
 async function fetchUsers() {

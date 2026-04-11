@@ -13,9 +13,7 @@ function GetAudiobookComponents() {
             });
         });
     }, []);
-    return (<>
-        <div>{String("audiobooks: ")}</div>
-        {audiobooks}</>);  // de /home moet nog veranderd worden naar de echte home-url
+    return (<>{audiobooks}</>);
 }
 
 async function fetchAudiobooks() {

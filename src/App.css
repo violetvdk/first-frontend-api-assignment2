@@ -1,0 +1,21 @@
+#navigation-bar {
+  background-color: blanchedalmond;
+  padding: 12px;
+  display: flex;
+  gap: 16px;
+  font-weight: bold;
+}
+
+#navigation-bar a {
+  color: #5f4040;
+  text-decoration: none;
+}
+
+#navigation-bar a:hover {
+  text-decoration: underline;
+}
+
+.title {
+    font-size: 24px;
+    color: #5f4040;
+}
