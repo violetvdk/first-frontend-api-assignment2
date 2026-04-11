@@ -1,15 +1,20 @@
 import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
+import "../../App.css"
 
 function GetAudiobookComponents() {
     const [audiobooks, setAudiobooks] = useState([]);
     useEffect(() => {
         fetchAudiobooks().then((links) => {
             fetchJSONSfromAudiobooks(links).then((audiobooks) => {
-                setAudiobooks(audiobooks.map((audiobook) => (<div key={audiobook.url}><Link to={`/audiobooks/${encodeURIComponent(audiobook.url)}`}>
-                    {audiobook.url}
-                </Link></div>)));
+                setAudiobooks(audiobooks.map((audiobook) => (
+                    <div key={audiobook.url}>
+                        <Link className="link" to={`/audiobooks/${encodeURIComponent(audiobook.url)}`}>
+                            {audiobook.url}
+                        </Link>
+                    </div>
+                )));
             });
         });
     }, []);

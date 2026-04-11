@@ -1,4 +1,5 @@
-import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Link, Route, Routes, Navigate} from "react-router-dom";
+import {useState} from "react";
 import Home from "./components/pages/Home.jsx";
 import Audioboeken from "./components/pages/Audioboeken.jsx";
 import Genres from "./components/pages/Genres.jsx";
@@ -14,16 +15,35 @@ import Not_found from "./components/pages/Not_found.jsx";
 import "./App.css";
 
 function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (<BrowserRouter>
           <nav id="navigation-bar">
-                <Link to="/home">Home</Link>
-                <Link to="/audiobooks">Audioboeken</Link>
-                <Link to="/genres">Genres</Link>
-                <Link to="/positions">Posities</Link>
-                <Link to="/reviews">Reviews</Link>
-                <Link to="/users">Gebruikers</Link>
+                <div className="nav-brand">
+                  <button className="hamburger" onClick={toggleMenu}>
+                    ☰
+                  </button>
+                  <span className="brand-text">Audiobooks API</span>
+                </div>
+                <div className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
+                  <Link to="/home" onClick={closeMenu}>Home</Link>
+                  <Link to="/audiobooks" onClick={closeMenu}>Audioboeken</Link>
+                  <Link to="/genres" onClick={closeMenu}>Genres</Link>
+                  <Link to="/positions" onClick={closeMenu}>Posities</Link>
+                  <Link to="/reviews" onClick={closeMenu}>Reviews</Link>
+                  <Link to="/users" onClick={closeMenu}>Gebruikers</Link>
+                </div>
           </nav>
         <Routes>
+            <Route path="/" element={<Navigate to="/home" />} />
             <Route path="/home" element={<Home/>}></Route>
             <Route path="/audiobooks" element={<Audioboeken/>}></Route>
             <Route path="/audiobooks/:url" element={<Audioboek/>}></Route>
