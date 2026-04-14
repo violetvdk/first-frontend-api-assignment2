@@ -159,6 +159,70 @@
   word-break: break-word;
 }
 
+.post-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 16px;
+}
+
+.post-screen-card {
+    width: min(760px, 96vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    background: #fffdf7;
+    border: 1px solid #e7d6ba;
+    border-radius: 12px;
+    padding: 20px 22px;
+    color: #5f4040;
+}
+
+.post-screen-card button {
+    margin-top: 0;
+}
+
+.post-message {
+  margin: 8px 0 0;
+}
+
+.post-error {
+  color: #b33a3a;
+}
+
+.post-success {
+  color: #2f7a3e;
+}
+
+.post-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.post-fields-table input {
+  min-height: 36px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
 @media (max-width: 954px) {
   #navigation-bar {
     justify-content: flex-start;
@@ -305,9 +369,28 @@
     margin-top: 4px;
     padding-top: 4px;
   }
-}
 
-.link {
-  font-size: 24px;
-  color: #5f4040;
+  .post-screen {
+    padding: 8px;
+  }
+
+  .post-screen-card {
+    width: 100%;
+    max-height: 92vh;
+    padding: 14px;
+  }
+
+  .post-actions {
+    justify-content: stretch;
+  }
+
+  .post-actions .myButton {
+    flex: 1 1 100%;
+  }
+
+  .post-fields-table th,
+  .post-fields-table td {
+    padding: 7px 8px;
+    font-size: 13px;
+  }
 }

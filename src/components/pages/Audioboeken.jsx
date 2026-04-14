@@ -2,9 +2,11 @@ import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import "../../App.css"
+import PostScreen from "../pop-ups/post/PostScreen.jsx";
 
 function GetAudiobookComponents() {
     const [audiobooks, setAudiobooks] = useState([]);
+    const [isPostOpen, setIsPostOpen] = useState(false);
     useEffect(() => {
         fetchAudiobooks().then((links) => {
             fetchJSONSfromAudiobooks(links).then((audiobooks) => {
@@ -18,8 +20,15 @@ function GetAudiobookComponents() {
             });
         });
     }, []);
-    return <div className="resource-list">{audiobooks}</div>;
+    return (<><div className="resource-list">{audiobooks}</div>
+        <div className="post-button">
+            <button className="myButton" onClick={() => setIsPostOpen(true)}>POST</button>
+            {isPostOpen && (
+                <PostScreen category="audiobooks" onClose={() => setIsPostOpen(false)} />
+            )}
+        </div></>);
 }
+
 
 async function fetchAudiobooks() {
     let index = await fetchIndex();
