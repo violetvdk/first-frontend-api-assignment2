@@ -50,7 +50,7 @@ function GetGenreComponents() {
                 ))}
             </div>
             <div className="post-button">
-                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
                 {isPostOpen && (

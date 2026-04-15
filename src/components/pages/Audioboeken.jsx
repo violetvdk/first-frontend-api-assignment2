@@ -51,7 +51,7 @@ function GetAudiobookComponents() {
                 ))}
             </div>
             <div className="post-button">
-                <button className="myButton" onClick={() => setIsPostOpen(true)}>POST</button>
+                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>POST</button>
                 {isPostOpen && (
                     <PostScreen category="audiobooks" onClose={() => setIsPostOpen(false)}/>
                 )}
