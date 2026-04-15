@@ -2,7 +2,7 @@ import "../../../App.css";
 import Fields from "./Fields.jsx";
 import usePostResource from "../../../hooks/usePostResource.jsx";
 
-function PostScreen({ category, onClose }) {
+function PostScreen({ category, onClose, mode = "POST", initialData = null, onSuccess }) {
   const {
     requiredFields,
     optionalFields,
@@ -14,7 +14,7 @@ function PostScreen({ category, onClose }) {
     isSubmitting,
     handleFieldChange,
     handleSubmit
-  } = usePostResource(category);
+  } = usePostResource(category, mode, initialData, onSuccess);
 
   return (
     <div className="post-screen" role="dialog" aria-modal="true">
@@ -35,7 +35,7 @@ function PostScreen({ category, onClose }) {
             />
             <div className="post-actions">
               <button className="post-btn post-btn-primary" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Submit"}
+                {isSubmitting ? "Saving..." : mode === "PUT" ? "Update" : "Submit"}
               </button>
               <button className="post-btn post-btn-secondary" type="button" onClick={onClose}>Close</button>
             </div>
