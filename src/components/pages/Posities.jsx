@@ -6,17 +6,20 @@ import DeleteButton from "../entities/DeleteButton.jsx";
 import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 
 function GetPositionComponents() {
+    const pageAmount = 100;
     const [positions, setPositions] = useState([]);
     const [isPostOpen, setIsPostOpen] = useState(false);
+    const [min, setMin] = useState(0);
+    const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
-        fetchPositions().then((links) => {
+        fetchPositionsPage(min, max).then((links) => {
             fetchJSONSfromPositions(links).then((positionList) => {
                 setPositions(positionList);
             });
         });
-    }, []);
+    }, [min, max]);
 
     function handleDeletedPosition(payload) {
         setDeleteError("");
@@ -47,25 +50,71 @@ function GetPositionComponents() {
                 ))}
             </div>
             <div className="post-button">
-                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>Post</button>
+                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                    POST
+                </button>
                 {isPostOpen && (
-                    <PostScreen category="positions" onClose={() => setIsPostOpen(false)} />
+                    <PostScreen
+                        category="positions"
+                        onClose={() => setIsPostOpen(false)}
+                    />
                 )}
             </div>
+            <button
+                className="previousPage"
+                onClick={() => {
+                    setMin((prev) => Math.max(prev - pageAmount, 0));
+                    setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                }}
+            >
+                Previous
+            </button>
+            <button
+                className="nextPage"
+                onClick={async () => {
+                    const length = await fetchPositionsLength();
+
+                    setMin((prevMin) => {
+                        const nextMin = prevMin + pageAmount;
+
+                        if (nextMin < length) {
+                            setMax(nextMin + pageAmount);
+                            return nextMin;
+                        }
+
+                        return prevMin;
+                    });
+                }}
+            >
+                Next
+            </button>
         </>
     );
 }
 
-async function fetchPositions() {
-    let index = await fetchIndex();
-    let result = await fetch(index["positions"]).then(response => {
+async function fetchPositionsPage(min, max) {
+    const index = await fetchIndex();
+    const result = await fetch(index["positions"]).then(response => {
         if (response.ok) {
             return response;
         } else {
             throw new Error('API call for positions failed with status ' + response.status);
         }
     });
-    return (await result.json())["positions"];
+    const data = await result.json();
+    return data.positions.slice(min, max);
+}
+
+async function fetchPositionsLength() {
+    const index = await fetchIndex();
+    const result = await fetch(index["positions"]).then(response => {
+        if (response.ok) {
+            return response;
+        } else {
+            throw new Error('API call for positions failed with status ' + response.status);
+        }
+    });
+    return (await result.json())["positions"].length;
 }
 
 async function fetchJSONSfromPositions(links) {
@@ -77,7 +126,7 @@ async function fetchJSONSfromPositions(links) {
 }
 
 async function fetchJSONfromPosition(link) {
-    let result = await fetch(link).then(response => {
+    const result = await fetch(link).then(response => {
         if (response.ok) {
             return response;
         } else {

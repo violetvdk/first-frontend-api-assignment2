@@ -6,17 +6,20 @@ import DeleteButton from "../entities/DeleteButton.jsx";
 import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 
 function GetGenreComponents() {
+    const pageAmount = 100;
     const [genres, setGenres] = useState([]);
     const [isPostOpen, setIsPostOpen] = useState(false);
+    const [min, setMin] = useState(0);
+    const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
-        fetchGenres().then((links) => {
+        fetchGenresPage(min, max).then((links) => {
             fetchJSONSfromGenres(links).then((genreList) => {
                 setGenres(genreList);
             });
         });
-    }, []);
+    }, [min, max]);
 
     function handleDeletedGenre(payload) {
         setDeleteError("");
@@ -47,25 +50,70 @@ function GetGenreComponents() {
                 ))}
             </div>
             <div className="post-button">
-                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>Post</button>
+                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                    POST
+                </button>
                 {isPostOpen && (
-                    <PostScreen category="genres" onClose={() => setIsPostOpen(false)} />
+                    <PostScreen
+                        category="genres"
+                        onClose={() => setIsPostOpen(false)}
+                    />
                 )}
             </div>
+            <button
+                className="previousPage"
+                onClick={() => {
+                    setMin((prev) => Math.max(prev - pageAmount, 0));
+                    setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                }}
+            >
+                Previous
+            </button>
+            <button
+                className="nextPage"
+                onClick={async () => {
+                    const length = await fetchGenresLength();
+                    setMin((prevMin) => {
+                        const nextMin = prevMin + pageAmount;
+
+                        if (nextMin < length) {
+                            setMax(nextMin + pageAmount);
+                            return nextMin;
+                        }
+
+                        return prevMin;
+                    });
+                }}
+            >
+                Next
+            </button>
         </>
     );
 }
 
-async function fetchGenres() {
-    let index = await fetchIndex();
-    let result = await fetch(index["genres"]).then(response => {
+async function fetchGenresPage(min, max) {
+    const index = await fetchIndex();
+    const result = await fetch(index["genres"]).then(response => {
         if (response.ok) {
             return response;
         } else {
             throw new Error('API call for genres failed with status ' + response.status);
         }
     });
-    return (await result.json())["genres"];
+    const data = await result.json();
+    return data.genres.slice(min, max);
+}
+
+async function fetchGenresLength() {
+    const index = await fetchIndex();
+    const result = await fetch(index["genres"]).then(response => {
+        if (response.ok) {
+            return response;
+        } else {
+            throw new Error('API call for genres failed with status ' + response.status);
+        }
+    });
+    return (await result.json())["genres"].length;
 }
 
 async function fetchJSONSfromGenres(links) {
@@ -77,7 +125,7 @@ async function fetchJSONSfromGenres(links) {
 }
 
 async function fetchJSONfromGenre(link) {
-    let result = await fetch(link).then(response => {
+    const result = await fetch(link).then(response => {
         if (response.ok) {
             return response;
         } else {

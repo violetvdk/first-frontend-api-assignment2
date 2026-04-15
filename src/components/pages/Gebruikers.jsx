@@ -6,17 +6,20 @@ import DeleteButton from "../entities/DeleteButton.jsx";
 import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 
 function Gebruikers() {
+    const pageAmount = 100;
     const [users, setUsers] = useState([]);
     const [isPostOpen, setIsPostOpen] = useState(false);
+    const [min, setMin] = useState(0);
+    const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
-        fetchUsers().then((links) => {
+        fetchUsersPage(min, max).then((links) => {
             fetchJSONSfromUsers(links).then((userList) => {
                 setUsers(userList);
             });
         });
-    }, []);
+    }, [min, max]);
 
     function handleDeletedUser(payload) {
         setDeleteError("");
@@ -47,25 +50,69 @@ function Gebruikers() {
                 ))}
             </div>
             <div className="post-button">
-                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>Post</button>
+                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                    POST
+                </button>
                 {isPostOpen && (
-                    <PostScreen category="users" onClose={() => setIsPostOpen(false)} />
+                    <PostScreen
+                        category="users"
+                        onClose={() => setIsPostOpen(false)}
+                    />
                 )}
             </div>
+            <button
+                className="previousPage"
+                onClick={() => {
+                    setMin((prev) => Math.max(prev - pageAmount, 0));
+                    setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                }}
+            >
+                Previous
+            </button>
+            <button
+                className="nextPage"
+                onClick={async () => {
+                    const length = await fetchUsersLength();
+                    setMin((prevMin) => {
+                        const nextMin = prevMin + pageAmount;
+
+                        if (nextMin < length) {
+                            setMax(nextMin + pageAmount);
+                            return nextMin;
+                        }
+                        return prevMin;
+                    });
+                }}
+            >
+                Next
+            </button>
         </>
     );
 }
 
-async function fetchUsers() {
-    let index = await fetchIndex();
-    let result = await fetch(index["users"]).then(response => {
+async function fetchUsersPage(min, max) {
+    const index = await fetchIndex();
+    const result = await fetch(index["users"]).then(response => {
         if (response.ok) {
             return response;
         } else {
             throw new Error('API call for users failed with status ' + response.status);
         }
     });
-    return (await result.json())["users"];
+    const data = await result.json();
+    return data.users.slice(min, max);
+}
+
+async function fetchUsersLength() {
+    const index = await fetchIndex();
+    const result = await fetch(index["users"]).then(response => {
+        if (response.ok) {
+            return response;
+        } else {
+            throw new Error('API call for users failed with status ' + response.status);
+        }
+    });
+    return (await result.json())["users"].length;
 }
 
 async function fetchJSONSfromUsers(links) {
@@ -77,7 +124,7 @@ async function fetchJSONSfromUsers(links) {
 }
 
 async function fetchJSONfromUser(link) {
-    let result = await fetch(link).then(response => {
+    const result = await fetch(link).then(response => {
         if (response.ok) {
             return response;
         } else {
