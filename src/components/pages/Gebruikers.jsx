@@ -12,6 +12,7 @@ function Gebruikers() {
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
+    const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         fetchUsersPage(min, max).then((links) => {
@@ -46,6 +47,12 @@ function Gebruikers() {
                             onDeleted={handleDeletedUser}
                             onError={handleDeleteError}
                         />
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing(user)}
+                        >
+                            PUT
+                        </button>
                     </div>
                 ))}
             </div>
@@ -53,10 +60,21 @@ function Gebruikers() {
                 <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
-                {isPostOpen && (
+                {(isPostOpen || editing) && (
                     <PostScreen
                         category="users"
-                        onClose={() => setIsPostOpen(false)}
+                        mode={editing ? "PUT" : "POST"}
+                        initialData={editing}
+                        onClose={() => {
+                            setIsPostOpen(false);
+                            setEditing(null);
+                        }}
+                        onSuccess={() => {
+                            setEditing(null);
+                            fetchUsersPage(min, max).then((links) => {
+                                fetchJSONSfromUsers(links).then(setUsers);
+                            });
+                        }}
                     />
                 )}
             </div>
@@ -131,7 +149,9 @@ async function fetchJSONfromUser(link) {
             throw new Error('API call for user details failed with status ' + response.status);
         }
     });
-    return await result.json();
+    const data = await result.json();
+    const etag = result.headers.get("ETag");
+    return {...data, etag};
 }
 
 export default Gebruikers;

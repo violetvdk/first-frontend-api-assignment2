@@ -12,6 +12,7 @@ function GetReviewComponents() {
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
+    const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         fetchReviewsPage(min, max).then((links) => {
@@ -46,6 +47,12 @@ function GetReviewComponents() {
                             onDeleted={handleDeletedReview}
                             onError={handleDeleteError}
                         />
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing(review)}
+                        >
+                            PUT
+                        </button>
                     </div>
                 ))}
             </div>
@@ -53,10 +60,21 @@ function GetReviewComponents() {
                 <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
-                {isPostOpen && (
+                {(isPostOpen || editing) && (
                     <PostScreen
                         category="reviews"
-                        onClose={() => setIsPostOpen(false)}
+                        mode={editing ? "PUT" : "POST"}
+                        initialData={editing}
+                        onClose={() => {
+                            setIsPostOpen(false);
+                            setEditing(null);
+                        }}
+                        onSuccess={() => {
+                            setEditing(null);
+                            fetchReviewsPage(min, max).then((links) => {
+                                fetchJSONSfromReviews(links).then(setReviews);
+                            });
+                        }}
                     />
                 )}
             </div>
@@ -132,7 +150,9 @@ async function fetchJSONfromReview(link) {
             throw new Error('API call for review details failed with status ' + response.status);
         }
     });
-    return await result.json();
+    const data = await result.json();
+    const etag = result.headers.get("ETag");
+    return {...data, etag};
 }
 
 export default GetReviewComponents;

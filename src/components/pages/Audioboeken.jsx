@@ -13,6 +13,7 @@ function GetAudiobookComponents() {
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
+    const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         fetchAudiobooksPage(min, max).then((links) => {
@@ -47,13 +48,33 @@ function GetAudiobookComponents() {
                             onDeleted={handleDeletedAudiobook}
                             onError={handleDeleteError}
                         />
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing(audiobook)}
+                        >
+                            PUT
+                        </button>
                     </div>
                 ))}
             </div>
             <div className="post-button">
                 <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>POST</button>
-                {isPostOpen && (
-                    <PostScreen category="audiobooks" onClose={() => setIsPostOpen(false)}/>
+                {(isPostOpen || editing) && (
+                    <PostScreen
+                        category="audiobooks"
+                        mode={editing ? "PUT" : "POST"}
+                        initialData={editing}
+                        onClose={() => {
+                            setIsPostOpen(false);
+                            setEditing(null);
+                        }}
+                        onSuccess={() => {
+                            setEditing(null);
+                            fetchAudiobooksPage(min, max).then((links) => {
+                                fetchJSONSfromAudiobooks(links).then(setAudiobooks);
+                            });
+                        }}
+                    />
                 )}
             </div>
             <button className="previousPage"
@@ -120,7 +141,9 @@ async function fetchJSONfromAudiobook(link) {
             throw new Error('API call for audiobook details failed with status ' + response.status);
         }
     });
-    return await result.json();
+    const data = await result.json();
+    const etag = result.headers.get("ETag");
+    return {...data, etag};
 }
 
 export default GetAudiobookComponents;

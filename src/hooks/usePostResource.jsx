@@ -22,7 +22,7 @@ function parseFieldValue(value) {
   return value;
 }
 
-function usePostResource(category) {
+function usePostResource(category, mode = "POST", initialData = null, onSuccess) {
   const [requiredFields, setRequiredFields] = useState([]);
   const [optionalFields, setOptionalFields] = useState([]);
   const [formValues, setFormValues] = useState({});
@@ -57,7 +57,11 @@ function usePostResource(category) {
           const nextValues = {};
           [...req, ...opt].forEach((field) => {
             const key = String(field);
-            nextValues[key] = previousValues[key] ?? "";
+            if (initialData && initialData[key] !== undefined) {
+              nextValues[key] = initialData[key] !== undefined && initialData[key] !== null ? String(initialData[key]) : "";
+            } else {
+              nextValues[key] = previousValues[key] ?? "";
+            }
           });
           return nextValues;
         });
@@ -69,7 +73,7 @@ function usePostResource(category) {
     }
 
     loadCategoryInfo();
-  }, [category]);
+  }, [category, initialData]);
 
   function handleFieldChange(name, value) {
     setFormValues((previousValues) => ({
@@ -110,22 +114,44 @@ function usePostResource(category) {
       setIsSubmitting(true);
       const index = await fetchIndex();
       const mediaType = getMediaTypeForCategory(category);
-      const response = await fetch(index[category], {
-        method: "POST",
-        headers: buildRequestHeaders({
-          authToken: API_BEARER_TOKEN,
-          accept: mediaType,
-          contentType: mediaType
-        }),
+      const url = mode === "PUT" && initialData?.url ? initialData.url : index[category];
+      const method = mode === "PUT" ? "PUT" : "POST";
+      const headers = buildRequestHeaders({
+        authToken: API_BEARER_TOKEN,
+        accept: mediaType,
+        contentType: mediaType
+      });
+      if (mode === "PUT" && initialData?.etag) {
+        headers["If-Match"] = initialData.etag;
+      }
+      const response = await fetch(url, {
+        method,
+        headers,
         body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
         const serverMessage = await response.text();
-        throw new Error(serverMessage || `POST failed with status ${response.status}`);
+        throw new Error(serverMessage || `${method} failed with status ${response.status}`);
       }
 
-      setSubmitSuccess("Saved successfully.");
+      let result = null;
+      try {
+        result = await response.json();
+      } catch {
+        result = null;
+      }
+      if (!result) {
+        result = {
+          ...payload,
+          url: initialData?.url
+        };
+      }
+
+      setSubmitSuccess(mode === "PUT" ? "Updated successfully." : "Saved successfully.");
+
+      if (onSuccess) onSuccess(result);
+
     } catch (error) {
       setSubmitError(error.message || "Could not submit this form");
     } finally {
