@@ -1,12 +1,17 @@
 import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
+import PostScreen from "../pop-ups/post/PostScreen.jsx";
 
 function Gebruikers() {
+    const pageAmount = 100;
     const [users, setUsers] = useState([]);
+    const [isPostOpen, setIsPostOpen] = useState(false);
+    const [min, setMin] = useState(0);
+    const [max, setMax] = useState(pageAmount);
 
     useEffect(() => {
-        fetchUsers().then((links) => {
+        fetchUsersPage(min, max).then((links) => {
             fetchJSONSfromUsers(links).then((users) => {
                 setUsers(users.map((user) => (
                     <div className="resource-card" key={user.url}>
@@ -17,21 +22,77 @@ function Gebruikers() {
                 )));
             });
         });
-    }, []);
+    }, [min, max]);
 
-    return <div className="resource-list">{users}</div>;
+    return (
+        <>
+            <div className="resource-list">
+                {users}
+                <button
+                    className="previousPage"
+                    onClick={() => {
+                        setMin((prev) => Math.max(prev - pageAmount, 0));
+                        setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                    }}
+                >
+                    Previous
+                </button>
+                <button
+                    className="nextPage"
+                    onClick={async () => {
+                        const length = await fetchUsersLength();
+                        setMin((prevMin) => {
+                            const nextMin = prevMin + pageAmount;
+
+                            if (nextMin < length) {
+                                setMax(nextMin + pageAmount);
+                                return nextMin;
+                            }
+                            return prevMin;
+                        });
+                    }}
+                >
+                    Next
+                </button>
+            </div>
+            <div className="post-button">
+                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                    POST
+                </button>
+                {isPostOpen && (
+                    <PostScreen
+                        category="users"
+                        onClose={() => setIsPostOpen(false)}
+                    />
+                )}
+            </div>
+        </>
+    );
 }
 
-async function fetchUsers() {
-    let index = await fetchIndex();
-    let result = await fetch(index["users"]).then(response => {
+async function fetchUsersPage(min, max) {
+    const index = await fetchIndex();
+    const result = await fetch(index["users"]).then(response => {
         if (response.ok) {
             return response;
         } else {
             throw new Error('API call for users failed with status ' + response.status);
         }
     });
-    return (await result.json())["users"];
+    const data = await result.json();
+    return data.users.slice(min, max);
+}
+
+async function fetchUsersLength() {
+    const index = await fetchIndex();
+    const result = await fetch(index["users"]).then(response => {
+        if (response.ok) {
+            return response;
+        } else {
+            throw new Error('API call for users failed with status ' + response.status);
+        }
+    });
+    return (await result.json())["users"].length;
 }
 
 async function fetchJSONSfromUsers(links) {
@@ -43,7 +104,7 @@ async function fetchJSONSfromUsers(links) {
 }
 
 async function fetchJSONfromUser(link) {
-    let result = await fetch(link).then(response => {
+    const result = await fetch(link).then(response => {
         if (response.ok) {
             return response;
         } else {
