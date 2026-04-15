@@ -8,18 +8,28 @@ import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 function GetPositionComponents() {
     const pageAmount = 100;
     const [positions, setPositions] = useState([]);
-    const [isPostOpen, setIsPostOpen] = useState(false);
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
     const [editing, setEditing] = useState(null);
 
     useEffect(() => {
-        fetchPositionsPage(min, max).then((links) => {
-            fetchJSONSfromPositions(links).then((positionList) => {
-                setPositions(positionList);
-            });
-        });
+        let ignore = false;
+        async function load() {
+            try {
+                const links = await fetchPositionsPage(min, max);
+                const items = await fetchJSONSfromPositions(links);
+                if (!ignore) {
+                    setPositions(items);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        void load();
+        return () => {
+            ignore = true;
+        };
     }, [min, max]);
 
     function handleDeletedPosition(payload) {
@@ -49,26 +59,27 @@ function GetPositionComponents() {
                         />
                         <button
                             className="post-btn post-btn-secondary"
-                            onClick={() => setEditing(position)}
+                            onClick={() => setEditing({...position, mode: "PUT"})}
                         >
                             PUT
+                        </button>
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing({ ...position, mode: "PATCH" })}
+                        >
+                            PATCH
                         </button>
                     </div>
                 ))}
             </div>
             <div className="post-button">
-                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
-                    POST
-                </button>
-                {(isPostOpen || editing) && (
+                <button className="post-btn post-btn-primary" onClick={() => setEditing({ mode: "POST" })}>POST</button>
+                {editing && (
                     <PostScreen
                         category="positions"
-                        mode={editing ? "PUT" : "POST"}
-                        initialData={editing}
-                        onClose={() => {
-                            setIsPostOpen(false);
-                            setEditing(null);
-                        }}
+                        mode={editing?.mode || "POST"}
+                        initialData={editing.mode === "POST" ? null : editing}
+                        onClose={() => setEditing(null)}
                         onSuccess={() => {
                             setEditing(null);
                             fetchPositionsPage(min, max).then((links) => {
