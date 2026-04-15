@@ -2,6 +2,8 @@ import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import PostScreen from "../pop-ups/post/PostScreen.jsx";
+import DeleteButton from "../entities/DeleteButton.jsx";
+import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 
 function GetGenreComponents() {
     const pageAmount = 100;
@@ -9,55 +11,46 @@ function GetGenreComponents() {
     const [isPostOpen, setIsPostOpen] = useState(false);
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
+    const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
         fetchGenresPage(min, max).then((links) => {
-            fetchJSONSfromGenres(links).then((genres) => {
-                setGenres(genres.map((genre) => (
-                    <div className="resource-card" key={genre.url}>
-                        <Link className="resource-link" to={`/genres/${encodeURIComponent(genre.url)}`}>
-                            {genre.url}
-                        </Link>
-                    </div>
-                )));
+            fetchJSONSfromGenres(links).then((genreList) => {
+                setGenres(genreList);
             });
         });
     }, [min, max]);
 
+    function handleDeletedGenre(payload) {
+        setDeleteError("");
+        setGenres((previous) => previous.filter((genre) => genre.url !== payload.url));
+    }
+
+    function handleDeleteError(message) {
+        setDeleteError(message);
+    }
+
     return (
         <>
+            {deleteError && <p className="post-message post-error resource-feedback">{deleteError}</p>}
             <div className="resource-list">
-                {genres}
-                <button
-                    className="previousPage"
-                    onClick={() => {
-                        setMin((prev) => Math.max(prev - pageAmount, 0));
-                        setMax((prev) => Math.max(prev - pageAmount, pageAmount));
-                    }}
-                >
-                    Previous
-                </button>
-                <button
-                    className="nextPage"
-                    onClick={async () => {
-                        const length = await fetchGenresLength();
-                        setMin((prevMin) => {
-                            const nextMin = prevMin + pageAmount;
-
-                            if (nextMin < length) {
-                                setMax(nextMin + pageAmount);
-                                return nextMin;
-                            }
-
-                            return prevMin;
-                        });
-                    }}
-                >
-                    Next
-                </button>
+                {genres.map((genre) => (
+                    <div className="resource-card resource-card-row" key={genre.url}>
+                        <Link className="resource-link" to={`/genres/${encodeURIComponent(genre.url)}`}>
+                            {genre.url}
+                        </Link>
+                        <DeleteButton
+                            resourceUrl={genre.url}
+                            requestInfo={buildDeleteRequestInfo()}
+                            payloadInfo={{ url: genre.url, type: "genre" }}
+                            onDeleted={handleDeletedGenre}
+                            onError={handleDeleteError}
+                        />
+                    </div>
+                ))}
             </div>
             <div className="post-button">
-                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
                 {isPostOpen && (
@@ -67,6 +60,33 @@ function GetGenreComponents() {
                     />
                 )}
             </div>
+            <button
+                className="previousPage"
+                onClick={() => {
+                    setMin((prev) => Math.max(prev - pageAmount, 0));
+                    setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                }}
+            >
+                Previous
+            </button>
+            <button
+                className="nextPage"
+                onClick={async () => {
+                    const length = await fetchGenresLength();
+                    setMin((prevMin) => {
+                        const nextMin = prevMin + pageAmount;
+
+                        if (nextMin < length) {
+                            setMax(nextMin + pageAmount);
+                            return nextMin;
+                        }
+
+                        return prevMin;
+                    });
+                }}
+            >
+                Next
+            </button>
         </>
     );
 }

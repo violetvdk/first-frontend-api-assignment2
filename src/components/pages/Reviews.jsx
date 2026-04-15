@@ -2,6 +2,8 @@ import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import PostScreen from "../pop-ups/post/PostScreen.jsx";
+import DeleteButton from "../entities/DeleteButton.jsx";
+import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 
 function GetReviewComponents() {
     const pageAmount = 100;
@@ -9,58 +11,48 @@ function GetReviewComponents() {
     const [isPostOpen, setIsPostOpen] = useState(false);
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
+    const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
         fetchReviewsPage(min, max).then((links) => {
-            fetchJSONSfromReviews(links).then((reviews) => {
-                setReviews(reviews.map((review) => (
-                    <div className="resource-card" key={review.url}>
-                        <Link className="resource-link" to={`/reviews/${encodeURIComponent(review.url)}`}>
-                            {review.url}
-                        </Link>
-                    </div>
-                )));
+            fetchJSONSfromReviews(links).then((reviewList) => {
+                setReviews(reviewList);
             });
         });
     }, [min, max]);
 
+    function handleDeletedReview(payload) {
+        setDeleteError("");
+        setReviews((previous) => previous.filter((review) => review.url !== payload.url));
+    }
+
+    function handleDeleteError(message) {
+        setDeleteError(message);
+    }
+
     return (
         <>
+            {deleteError && <p className="post-message post-error resource-feedback">{deleteError}</p>}
             <div className="resource-list">
-                {reviews}
-                <button
-                    className="previousPage"
-                    onClick={() => {
-                        setMin((prev) => Math.max(prev - pageAmount, 0));
-                        setMax((prev) => Math.max(prev - pageAmount, pageAmount));
-                    }}
-                >
-                    Previous
-                </button>
-                <button
-                    className="nextPage"
-                    onClick={async () => {
-                        const length = await fetchReviewsLength();
-
-                        setMin((prevMin) => {
-                            const nextMin = prevMin + pageAmount;
-                            if (nextMin < length) {
-                                setMax(nextMin + pageAmount);
-                                return nextMin;
-                            }
-
-                            return prevMin;
-                        });
-                    }}
-                >
-                    Next
-                </button>
+                {reviews.map((review) => (
+                    <div className="resource-card resource-card-row" key={review.url}>
+                        <Link className="resource-link" to={`/reviews/${encodeURIComponent(review.url)}`}>
+                            {review.url}
+                        </Link>
+                        <DeleteButton
+                            resourceUrl={review.url}
+                            requestInfo={buildDeleteRequestInfo()}
+                            payloadInfo={{ url: review.url, type: "review" }}
+                            onDeleted={handleDeletedReview}
+                            onError={handleDeleteError}
+                        />
+                    </div>
+                ))}
             </div>
             <div className="post-button">
-                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
-
                 {isPostOpen && (
                     <PostScreen
                         category="reviews"
@@ -68,6 +60,33 @@ function GetReviewComponents() {
                     />
                 )}
             </div>
+            <button
+                className="previousPage"
+                onClick={() => {
+                    setMin((prev) => Math.max(prev - pageAmount, 0));
+                    setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                }}
+            >
+                Previous
+            </button>
+            <button
+                className="nextPage"
+                onClick={async () => {
+                    const length = await fetchReviewsLength();
+
+                    setMin((prevMin) => {
+                        const nextMin = prevMin + pageAmount;
+                        if (nextMin < length) {
+                            setMax(nextMin + pageAmount);
+                            return nextMin;
+                        }
+
+                        return prevMin;
+                    });
+                }}
+            >
+                Next
+            </button>
         </>
     );
 }

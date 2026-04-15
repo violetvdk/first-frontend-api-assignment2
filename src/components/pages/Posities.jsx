@@ -2,6 +2,8 @@ import fetchIndex from "../../data/index.jsx";
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import PostScreen from "../pop-ups/post/PostScreen.jsx";
+import DeleteButton from "../entities/DeleteButton.jsx";
+import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 
 function GetPositionComponents() {
     const pageAmount = 100;
@@ -9,56 +11,46 @@ function GetPositionComponents() {
     const [isPostOpen, setIsPostOpen] = useState(false);
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
+    const [deleteError, setDeleteError] = useState("");
 
     useEffect(() => {
         fetchPositionsPage(min, max).then((links) => {
-            fetchJSONSfromPositions(links).then((positions) => {
-                setPositions(positions.map((position) => (
-                    <div className="resource-card" key={position.url}>
-                        <Link className="resource-link" to={`/positions/${encodeURIComponent(position.url)}`}>
-                            {position.url}
-                        </Link>
-                    </div>
-                )));
+            fetchJSONSfromPositions(links).then((positionList) => {
+                setPositions(positionList);
             });
         });
     }, [min, max]);
 
+    function handleDeletedPosition(payload) {
+        setDeleteError("");
+        setPositions((previous) => previous.filter((position) => position.url !== payload.url));
+    }
+
+    function handleDeleteError(message) {
+        setDeleteError(message);
+    }
+
     return (
         <>
+            {deleteError && <p className="post-message post-error resource-feedback">{deleteError}</p>}
             <div className="resource-list">
-                {positions}
-                <button
-                    className="previousPage"
-                    onClick={() => {
-                        setMin((prev) => Math.max(prev - pageAmount, 0));
-                        setMax((prev) => Math.max(prev - pageAmount, pageAmount));
-                    }}
-                >
-                    Previous
-                </button>
-                <button
-                    className="nextPage"
-                    onClick={async () => {
-                        const length = await fetchPositionsLength();
-
-                        setMin((prevMin) => {
-                            const nextMin = prevMin + pageAmount;
-
-                            if (nextMin < length) {
-                                setMax(nextMin + pageAmount);
-                                return nextMin;
-                            }
-
-                            return prevMin;
-                        });
-                    }}
-                >
-                    Next
-                </button>
+                {positions.map((position) => (
+                    <div className="resource-card resource-card-row" key={position.url}>
+                        <Link className="resource-link" to={`/positions/${encodeURIComponent(position.url)}`}>
+                            {position.url}
+                        </Link>
+                        <DeleteButton
+                            resourceUrl={position.url}
+                            requestInfo={buildDeleteRequestInfo()}
+                            payloadInfo={{ url: position.url, type: "position" }}
+                            onDeleted={handleDeletedPosition}
+                            onError={handleDeleteError}
+                        />
+                    </div>
+                ))}
             </div>
             <div className="post-button">
-                <button className="myButton" onClick={() => setIsPostOpen(true)}>
+                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
                 {isPostOpen && (
@@ -68,6 +60,34 @@ function GetPositionComponents() {
                     />
                 )}
             </div>
+            <button
+                className="previousPage"
+                onClick={() => {
+                    setMin((prev) => Math.max(prev - pageAmount, 0));
+                    setMax((prev) => Math.max(prev - pageAmount, pageAmount));
+                }}
+            >
+                Previous
+            </button>
+            <button
+                className="nextPage"
+                onClick={async () => {
+                    const length = await fetchPositionsLength();
+
+                    setMin((prevMin) => {
+                        const nextMin = prevMin + pageAmount;
+
+                        if (nextMin < length) {
+                            setMax(nextMin + pageAmount);
+                            return nextMin;
+                        }
+
+                        return prevMin;
+                    });
+                }}
+            >
+                Next
+            </button>
         </>
     );
 }
