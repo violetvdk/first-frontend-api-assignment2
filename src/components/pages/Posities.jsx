@@ -12,6 +12,7 @@ function GetPositionComponents() {
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
+    const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         fetchPositionsPage(min, max).then((links) => {
@@ -46,6 +47,12 @@ function GetPositionComponents() {
                             onDeleted={handleDeletedPosition}
                             onError={handleDeleteError}
                         />
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing(position)}
+                        >
+                            PUT
+                        </button>
                     </div>
                 ))}
             </div>
@@ -53,10 +60,21 @@ function GetPositionComponents() {
                 <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
-                {isPostOpen && (
+                {(isPostOpen || editing) && (
                     <PostScreen
                         category="positions"
-                        onClose={() => setIsPostOpen(false)}
+                        mode={editing ? "PUT" : "POST"}
+                        initialData={editing}
+                        onClose={() => {
+                            setIsPostOpen(false);
+                            setEditing(null);
+                        }}
+                        onSuccess={() => {
+                            setEditing(null);
+                            fetchPositionsPage(min, max).then((links) => {
+                                fetchJSONSfromPositions(links).then(setPositions);
+                            });
+                        }}
                     />
                 )}
             </div>
@@ -133,7 +151,9 @@ async function fetchJSONfromPosition(link) {
             throw new Error('API call for position details failed with status ' + response.status);
         }
     });
-    return await result.json();
+    const data = await result.json();
+    const etag = result.headers.get("ETag");
+    return {...data, etag};
 }
 
 export default GetPositionComponents;

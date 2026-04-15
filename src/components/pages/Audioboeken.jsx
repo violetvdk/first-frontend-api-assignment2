@@ -13,7 +13,7 @@ function GetAudiobookComponents() {
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
-    const [editingAudiobook, setEditingAudiobook] = useState(null);
+    const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         fetchAudiobooksPage(min, max).then((links) => {
@@ -50,7 +50,7 @@ function GetAudiobookComponents() {
                         />
                         <button
                             className="post-btn post-btn-secondary"
-                            onClick={() => setEditingAudiobook(audiobook)}
+                            onClick={() => setEditing(audiobook)}
                         >
                             PUT
                         </button>
@@ -59,18 +59,17 @@ function GetAudiobookComponents() {
             </div>
             <div className="post-button">
                 <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>POST</button>
-                {(isPostOpen || editingAudiobook) && (
+                {(isPostOpen || editing) && (
                     <PostScreen
                         category="audiobooks"
-                        mode={editingAudiobook ? "PUT" : "POST"}
-                        initialData={editingAudiobook}
+                        mode={editing ? "PUT" : "POST"}
+                        initialData={editing}
                         onClose={() => {
                             setIsPostOpen(false);
-                            setEditingAudiobook(null);
+                            setEditing(null);
                         }}
                         onSuccess={() => {
-                            setEditingAudiobook(null);
-
+                            setEditing(null);
                             fetchAudiobooksPage(min, max).then((links) => {
                                 fetchJSONSfromAudiobooks(links).then(setAudiobooks);
                             });

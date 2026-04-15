@@ -12,6 +12,7 @@ function GetGenreComponents() {
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
+    const [editing, setEditing] = useState(null);
 
     useEffect(() => {
         fetchGenresPage(min, max).then((links) => {
@@ -46,6 +47,12 @@ function GetGenreComponents() {
                             onDeleted={handleDeletedGenre}
                             onError={handleDeleteError}
                         />
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing(genre)}
+                        >
+                            PUT
+                        </button>
                     </div>
                 ))}
             </div>
@@ -53,10 +60,21 @@ function GetGenreComponents() {
                 <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>
                     POST
                 </button>
-                {isPostOpen && (
+                {(isPostOpen || editing) && (
                     <PostScreen
                         category="genres"
-                        onClose={() => setIsPostOpen(false)}
+                        mode={editing ? "PUT" : "POST"}
+                        initialData={editing}
+                        onClose={() => {
+                            setIsPostOpen(false);
+                            setEditing(null);
+                        }}
+                        onSuccess={() => {
+                            setEditing(null);
+                            fetchGenresPage(min, max).then((links) => {
+                                fetchJSONSfromGenres(links).then(setGenres);
+                            });
+                        }}
                     />
                 )}
             </div>
@@ -132,7 +150,9 @@ async function fetchJSONfromGenre(link) {
             throw new Error('API call for genre details failed with status ' + response.status);
         }
     });
-    return await result.json();
+    const data = await result.json();
+    const etag = result.headers.get("ETag");
+    return {...data, etag};
 }
 
 export default GetGenreComponents;
