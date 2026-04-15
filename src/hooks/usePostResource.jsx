@@ -7,11 +7,11 @@ import {
 } from "../data/apiConfig.jsx";
 
 function parseFieldValue(value) {
-  if (!value) {
+  if (value === undefined || value === null || value === "") {
     return value;
   }
 
-  if (value.startsWith("[") || value.startsWith("{")) {
+  if (typeof value === "string" && (value.startsWith("[") || value.startsWith("{"))) {
     try {
       return JSON.parse(value);
     } catch {
@@ -97,45 +97,58 @@ function usePostResource(category, mode = "POST", initialData = null, onSuccess)
         setSubmitError(`Please fill in required field: ${key}`);
         return;
       }
-
-      payload[key] = parseFieldValue(value);
     }
 
-    for (const field of optionalFields) {
+    for (const field of [...requiredFields, ...optionalFields]) {
       const key = String(field);
       const value = (formValues[key] || "").trim();
+      const original = initialData?.[key] !== undefined && initialData?.[key] !== null ? String(initialData[key]) : "";
 
-      if (value) {
-        payload[key] = parseFieldValue(value);
+      if (mode === "PATCH") {
+        if (!(value === "" && original === "") && value !== original) {
+          payload[key] = parseFieldValue(value);
+        }
+      } else {
+        if (value !== "") {
+          payload[key] = parseFieldValue(value);
+        }
       }
+    }
+
+    if (mode === "PATCH" && Object.keys(payload).length === 0) {
+      setSubmitSuccess("Nothing changed.");
+      return;
     }
 
     try {
       setIsSubmitting(true);
       const index = await fetchIndex();
       const mediaType = getMediaTypeForCategory(category);
-      const url = mode === "PUT" && initialData?.url ? initialData.url : index[category];
-      const method = mode === "PUT" ? "PUT" : "POST";
+      const isUpdate = mode === "PUT" || mode === "PATCH";
+      if (isUpdate && !initialData?.url) {
+        throw new Error("Missing resource URL for update");
+      }
+      const url = isUpdate ? initialData.url : index[category];
       const headers = buildRequestHeaders({
         authToken: API_BEARER_TOKEN,
         accept: mediaType,
         contentType: mediaType
       });
-      if (mode === "PUT" && initialData?.etag) {
+      if (isUpdate && initialData?.etag) {
         headers["If-Match"] = initialData.etag;
       }
       const response = await fetch(url, {
-        method,
+        method: mode,
         headers,
         body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
         const serverMessage = await response.text();
-        throw new Error(serverMessage || `${method} failed with status ${response.status}`);
+        throw new Error(serverMessage || `${mode} failed with status ${response.status}`);
       }
 
-      let result = null;
+      let result;
       try {
         result = await response.json();
       } catch {
@@ -144,11 +157,14 @@ function usePostResource(category, mode = "POST", initialData = null, onSuccess)
       if (!result) {
         result = {
           ...payload,
-          url: initialData?.url
+          url: initialData?.url,
+          etag: initialData?.etag
         };
       }
 
-      setSubmitSuccess(mode === "PUT" ? "Updated successfully." : "Saved successfully.");
+      const successMessage = mode === "POST" ? "Saved successfully." : mode === "PATCH" ? "Patched successfully." : "Updated successfully.";
+
+      setSubmitSuccess(successMessage);
 
       if (onSuccess) onSuccess(result);
 
@@ -174,4 +190,3 @@ function usePostResource(category, mode = "POST", initialData = null, onSuccess)
 }
 
 export default usePostResource;
-
