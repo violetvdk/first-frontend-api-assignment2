@@ -35,7 +35,7 @@ function PostScreen({ category, onClose, mode = "POST", initialData = null, onSu
             />
             <div className="post-actions">
               <button className="post-btn post-btn-primary" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : mode === "PUT" ? "Update" : "Submit"}
+                {isSubmitting ? "Saving..." : mode === "PUT" ? "Update" : mode === "PATCH" ? "Patch" : "Submit"}
               </button>
               <button className="post-btn post-btn-secondary" type="button" onClick={onClose}>Close</button>
             </div>

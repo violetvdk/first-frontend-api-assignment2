@@ -9,18 +9,28 @@ import { buildDeleteRequestInfo } from "../../data/apiConfig.jsx";
 function GetAudiobookComponents() {
     const pageAmount = 100;
     const [audiobooks, setAudiobooks] = useState([]);
-    const [isPostOpen, setIsPostOpen] = useState(false);
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(pageAmount);
     const [deleteError, setDeleteError] = useState("");
     const [editing, setEditing] = useState(null);
 
     useEffect(() => {
-        fetchAudiobooksPage(min, max).then((links) => {
-            fetchJSONSfromAudiobooks(links).then((items) => {
-                setAudiobooks(items);
-            });
-        });
+        let ignore = false;
+        async function load() {
+            try {
+                const links = await fetchAudiobooksPage(min, max);
+                const items = await fetchJSONSfromAudiobooks(links);
+                if (!ignore) {
+                    setAudiobooks(items);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        void load();
+        return () => {
+            ignore = true;
+        };
     }, [min, max]);
 
     function handleDeletedAudiobook(payload) {
@@ -50,24 +60,27 @@ function GetAudiobookComponents() {
                         />
                         <button
                             className="post-btn post-btn-secondary"
-                            onClick={() => setEditing(audiobook)}
+                            onClick={() => setEditing({...audiobook, mode: "PUT"})}
                         >
                             PUT
+                        </button>
+                        <button
+                            className="post-btn post-btn-secondary"
+                            onClick={() => setEditing({ ...audiobook, mode: "PATCH" })}
+                        >
+                            PATCH
                         </button>
                     </div>
                 ))}
             </div>
             <div className="post-button">
-                <button className="post-btn post-btn-primary" onClick={() => setIsPostOpen(true)}>POST</button>
-                {(isPostOpen || editing) && (
+                <button className="post-btn post-btn-primary" onClick={() => setEditing({ mode: "POST" })}>POST</button>
+                {editing && (
                     <PostScreen
                         category="audiobooks"
-                        mode={editing ? "PUT" : "POST"}
-                        initialData={editing}
-                        onClose={() => {
-                            setIsPostOpen(false);
-                            setEditing(null);
-                        }}
+                        mode={editing?.mode || "POST"}
+                        initialData={editing.mode === "POST" ? null : editing}
+                        onClose={() => setEditing(null)}
                         onSuccess={() => {
                             setEditing(null);
                             fetchAudiobooksPage(min, max).then((links) => {
