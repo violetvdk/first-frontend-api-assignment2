@@ -37,15 +37,32 @@ async function fetchJSONfromGenre(link) {
     return await result.json();
 }
 
+async function fetchNameFromLink(link) {
+    let result = await fetch(link);
+    return (await result.json()).name;
+}
+
+function AudiobooksCell({value}){
+    const[names, setNames] = useState({});
+
+    useEffect(() => {
+        Promise.all(value.map(async (v) => [v,await fetchNameFromLink(v)])).then(entries => {
+            setNames(Object.fromEntries(entries));
+        });
+    }, [value]);
+
+    return value.map((v) => (
+        <div key={`genres-${v}`}>
+            <Link to={`/audiobooks/${encodeURIComponent(v)}`}>
+                {names[v] || String(v)}
+            </Link>
+        </div>
+    ));
+}
+
 function makeCellContent(key, value) {
     if (key === "audiobooks") {
-        return value.map((v) => (
-            <div key={`${key}-${v}`}>
-                <Link to={`/${key}/${encodeURIComponent(v)}`}>
-                    {String(v)}
-                </Link>
-            </div>
-        ));
+        return <AudiobooksCell value={value}/>;
     }
 
     if (key === "url") {

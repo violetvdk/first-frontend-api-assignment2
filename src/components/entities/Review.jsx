@@ -37,13 +37,28 @@ async function fetchJSONfromReview(link) {
     return await result.json();
 }
 
+async function fetchNameFromLink(link) {
+    let result = await fetch(link);
+    return (await result.json()).name;
+}
+
+function EntityCell({ keyName, value }) {
+    const [name, setName] = useState("");
+
+    useEffect(() => {
+        fetchNameFromLink(value).then(setName);
+    }, [value]);
+
+    return (
+        <Link to={`/${keyName}s/${encodeURIComponent(value)}`}>
+            {name || String(value)}
+        </Link>
+    );
+}
+
 function makeCellContent(key, value) {
     if (["user", "audiobook"].includes(key)) {
-        return (
-            <Link to={`/${key}s/${encodeURIComponent(value)}`}>
-                {String(value)}
-            </Link>
-        );
+        return <EntityCell keyName={key} value={value} />;
     }
 
     if (key === "url") {
